@@ -11,7 +11,7 @@
 ### OpenCV ###
 #OpenCV for Mac and Linux
 #build and release folders
-CMakeFiles/
+/CMakeFiles/
 CMakeCache.txt
 Makefile
 cmake_install.cmake
