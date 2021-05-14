@@ -1,0 +1,7 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT( Musible )
+FIND_PACKAGE( OpenCV REQUIRED )
+INCLUDE_DIRECTORIES ( Braille.h )
+ADD_EXECUTABLE( Musible main.cpp )
+TARGET_LINK_LIBRARIES( Musible ${OpenCV_LIBS} )
+target_include_directories(Musible PUBLIC ${CMAKE_SOURCE_DIR}/include)
