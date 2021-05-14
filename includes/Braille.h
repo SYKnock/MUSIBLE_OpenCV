@@ -96,9 +96,9 @@ Mat brailleSegmentation(Mat score, vector<int> gridX, vector<int> gridY, int blo
 		}
 	}
 
-	namedWindow("Result5", 0);
-	imshow("Result5", BrailleScore);
-	resizeWindow("Result5", BrailleScore.cols, BrailleScore.rows);
+	// namedWindow("Result5", 0);
+	// imshow("Result5", BrailleScore);
+	// resizeWindow("Result5", BrailleScore.cols, BrailleScore.rows);
 
 	return BrailleScore;
 }
@@ -233,9 +233,9 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 	for (int i = 0; i < blobY.size(); i++)
 		line(coordinateScore, Point(0, blobY[i]), Point(coordinateScore.cols, blobY[i]), Scalar(255, 0, 0));
 
-	namedWindow("Result3", 0);
-	imshow("Result3", coordinateScore);
-	resizeWindow("Result3", coordinateScore.cols, coordinateScore.rows);
+	// namedWindow("Result3", 0);
+	// imshow("Result3", coordinateScore);
+	// resizeWindow("Result3", coordinateScore.cols, coordinateScore.rows);
 
 	int distanceX;
 	int distanceY;
@@ -282,9 +282,9 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 	//dilate(fixedScore, fixedScore, Mat::ones(Size(3, 3), CV_8UC1), Point(-1, -1));
 	//erode(fixedScore, fixedScore, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1));
 
-	namedWindow("Result4", 0);
-	imshow("Result4", fixedScore);
-	resizeWindow("Result4", fixedScore.cols, fixedScore.rows);
+	// namedWindow("Result4", 0);
+	// imshow("Result4", fixedScore);
+	// resizeWindow("Result4", fixedScore.cols, fixedScore.rows);
 
 	vector<int> gridX = makeGridX(blobX, xLineCnt, blobSize);
 	vector<int> gridY;
@@ -303,9 +303,9 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 	for (int i = 0; i < gridY.size(); i++)
 		line(tmp, Point(0, gridY[i]), Point(tmp.cols, gridY[i]), Scalar(255, 0, 0));
 
-	namedWindow("Result6", 0);
-	imshow("Result6", tmp);
-	resizeWindow("Result6", tmp.cols, tmp.rows);
+	// namedWindow("Result6", 0);
+	// imshow("Result6", tmp);
+	// resizeWindow("Result6", tmp.cols, tmp.rows);
 
 	Mat BrailleScore = brailleSegmentation(fixedScore, gridX, gridY, blobSize);
 
@@ -393,9 +393,9 @@ Mat findCircle(Mat score)
 
 	drawKeypoints(score, keypoints, blobScore, Scalar(0, 0, 255), DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
-	namedWindow("Result2", 0);
-	imshow("Result2", blobScore);
-	resizeWindow("Result2", blobScore.cols, blobScore.rows);
+	// namedWindow("Result2", 0);
+	// imshow("Result2", blobScore);
+	// resizeWindow("Result2", blobScore.cols, blobScore.rows);
 
 	// blob is done
 
@@ -435,9 +435,9 @@ Mat dataCheck(Mat score, vector<KeyPoint> keypoints)
 		putText(dataScore, bitset<6>(brailleSet[i].value).to_string(), bottomLeft, font, fontScale * 0.5, Scalar(0, 0, 0), fontThick * 0.5);
 	}
 
-	namedWindow("Result7", 0);
-	imshow("Result7", dataScore);
-	resizeWindow("Result7", dataScore.cols, dataScore.rows);
+	// namedWindow("Result7", 0);
+	// imshow("Result7", dataScore);
+	// resizeWindow("Result7", dataScore.cols, dataScore.rows);
 
 	return dataScore;
 }
