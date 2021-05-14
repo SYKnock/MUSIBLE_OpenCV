@@ -7,17 +7,13 @@
 # KDE directory preferences
 .directory
 
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
-# .nfs files are created when an open file is removed but is still being accessed
-.nfs*
 
 ### OpenCV ###
 #OpenCV for Mac and Linux
 #build and release folders
-*/CMakeFiles
-*/CMakeCache.txt
-*/Makefile
-*/cmake_install.cmake
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
 .DS_Store
+Musible
