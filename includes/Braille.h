@@ -1,7 +1,3 @@
-//#include "opencv2/imgproc/imgproc.hpp"
-//#include "opencv2/imgcodecs.hpp"
-//#include "opencv2/highgui/highgui.hpp"
-//#include "opencv2/opencv.hpp"
 #include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -10,6 +6,7 @@
 #include <stdlib.h>
 #include <algorithm>
 #include <bitset>
+#include <math.h>
 
 using namespace cv;
 using namespace std;
@@ -29,18 +26,38 @@ typedef struct __Braille
 	{
 	}
 
-}Braille;
+} Braille;
+
+typedef struct __Note
+{
+	int tick;
+	int value;
+	__Note()
+	{
+		tick= 0;
+		value = 0;
+	}
+	~__Note()
+	{
+	}
+
+} Note;
 
 vector<Braille> brailleSet;
-
+vector<Note> noteSet;
+int xLineCnt = 1;
+int yLineCnt = 1;
+int realX;
 
 Mat preprocess(Mat score);
 Mat brailleSegmentation(Mat score, vector<int> blobX, vector<int> blobY, int blobSize);
 Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints);
 Mat findCircle(Mat score);
-vector<int> makeGridX(vector<int> blobX, int xLineCnt, int blobSize);
+vector<int> makeGridX(vector<int> blobX, int blobSize);
 Mat dataCheck(Mat score, vector<KeyPoint> keypoints);
 float getBlobSize(vector<KeyPoint> keypoints);
+void convert2Score();
+int checkOctave(int octave);
 
 Mat preprocess(Mat score)
 {
@@ -70,7 +87,6 @@ Mat brailleSegmentation(Mat score, vector<int> gridX, vector<int> gridY, int blo
 	Braille tempB;
 	int value = 0;
 	int index = 0;
-
 
 	for (int i = 0; i < gridY.size() - 2; i += 3)
 	{
@@ -122,8 +138,6 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 
 	bool flag = true;
 	int representLineSize = 0;
-	int xLineCnt = 1;
-	int yLineCnt = 1;
 
 	vector<int> tempX;
 	vector<int> tempY;
@@ -147,14 +161,12 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 		}
 	}
 
-	// printf("\nX: %d Y: %d\n", xLineCnt, yLineCnt);
-
-	int* avgX = new int[xLineCnt];
-	int* avgY = new int[yLineCnt];
+	int *avgX = new int[xLineCnt];
+	int *avgY = new int[yLineCnt];
 	memset(avgX, 0, xLineCnt * sizeof(float));
 	memset(avgY, 0, yLineCnt * sizeof(float));
-	int* tmpCntX = new int[xLineCnt];
-	int* tmpCntY = new int[yLineCnt];
+	int *tmpCntX = new int[xLineCnt];
+	int *tmpCntY = new int[yLineCnt];
 	memset(tmpCntX, 0, xLineCnt * sizeof(int));
 	memset(tmpCntY, 0, yLineCnt * sizeof(int));
 	int tmpIndexX = 0;
@@ -196,26 +208,11 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 			}
 		}
 	}
-	/*for (int i = 0; i < xLineCnt; i++)
-		printf("%d ", avgX[i]);
-	printf("\n");
-	for (int i = 0; i < yLineCnt; i++)
-		printf("%d ", avgY[i]);
-	printf("\n");*/
-
 	for (int i = 0; i < xLineCnt; i++)
 		avgX[i] /= tmpCntX[i];
 
 	for (int i = 0; i < yLineCnt; i++)
 		avgY[i] /= tmpCntY[i];
-
-	/*for (int i = 0; i < xLineCnt; i++)
-		printf("%d ", avgX[i]);
-	printf("\n");
-	for (int i = 0; i < yLineCnt; i++)
-		printf("%d ", avgY[i]);
-	printf("\n");*/
-
 
 	for (int i = 0; i < xLineCnt; i++)
 		blobX.push_back((int)avgX[i]);
@@ -224,7 +221,6 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 
 	sort(blobX.begin(), blobX.end());
 	sort(blobY.begin(), blobY.end());
-
 
 	Mat coordinateScore = blobScore.clone();
 
@@ -270,7 +266,6 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 		keypoints[i].pt.y = yBuffer;
 	}
 
-
 	Mat fixedScore = Mat(blobScore.size(), CV_8UC1);
 	fixedScore.setTo(255);
 	for (int i = 0; i < keypoints.size(); i++)
@@ -278,22 +273,17 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 		circle(fixedScore, Point(keypoints[i].pt.x, keypoints[i].pt.y), blobSize / 2, Scalar(0), -1, LINE_AA);
 	}
 
-	// closing으로 점자들 붙는것 방지
-	//dilate(fixedScore, fixedScore, Mat::ones(Size(3, 3), CV_8UC1), Point(-1, -1));
-	//erode(fixedScore, fixedScore, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1));
-
 	// namedWindow("Result4", 0);
 	// imshow("Result4", fixedScore);
 	// resizeWindow("Result4", fixedScore.cols, fixedScore.rows);
 
-	vector<int> gridX = makeGridX(blobX, xLineCnt, blobSize);
+	vector<int> gridX = makeGridX(blobX, blobSize);
 	vector<int> gridY;
 
 	for (vector<int>::iterator iter = blobY.begin(); iter != blobY.end(); iter++)
 	{
 		gridY.push_back(*iter);
 	}
-
 
 	Mat tmp = fixedScore.clone();
 	cvtColor(tmp, tmp, COLOR_GRAY2BGR);
@@ -309,15 +299,14 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 
 	Mat BrailleScore = brailleSegmentation(fixedScore, gridX, gridY, blobSize);
 
-
 	return BrailleScore;
 }
 
-vector<int> makeGridX(vector<int> blobX, int xLineCnt, int blobSize)
+vector<int> makeGridX(vector<int> blobX, int blobSize)
 {
 	vector<int> gridX;
 	int average = 0;
-	int* distance = new int[xLineCnt - 1];
+	int *distance = new int[xLineCnt - 1];
 
 	for (vector<int>::iterator iter = blobX.begin(); iter != blobX.end(); iter++)
 		gridX.push_back(*iter);
@@ -326,7 +315,7 @@ vector<int> makeGridX(vector<int> blobX, int xLineCnt, int blobSize)
 		distance[i] = blobX[i + 1] - blobX[i];
 	for (int i = 0; i < xLineCnt - 1; i++)
 		average += distance[i];
-	average /= xLineCnt - 1;
+	average /= xLineCnt - yLineCnt;
 
 	vector<int> refinedDistance;
 
@@ -338,10 +327,8 @@ vector<int> makeGridX(vector<int> blobX, int xLineCnt, int blobSize)
 		{
 			refinedDistance.push_back(distance[i]);
 		}
-
 	}
 	int refinedAverage = 0;
-
 
 	for (vector<int>::iterator iter = refinedDistance.begin(); iter != refinedDistance.end(); iter++)
 		refinedAverage += *iter;
@@ -357,6 +344,7 @@ vector<int> makeGridX(vector<int> blobX, int xLineCnt, int blobSize)
 			i--;
 		}
 	}
+	realX = gridX.size();
 	return gridX;
 }
 
@@ -386,7 +374,8 @@ Mat findCircle(Mat score)
 	vector<KeyPoint> keypoints;
 	detector->detect(score, keypoints);
 
-	if (keypoints.empty()) {
+	if (keypoints.empty())
+	{
 		cout << "There is no braille in score" << endl;
 		return score;
 	}
@@ -440,4 +429,188 @@ Mat dataCheck(Mat score, vector<KeyPoint> keypoints)
 	// resizeWindow("Result7", dataScore.cols, dataScore.rows);
 
 	return dataScore;
+}
+
+void convert2Score()
+{
+	int RH_cnt = 0;
+	int LH_cnt = 0;
+	int hFlag = 0;
+	int octaveFlag = 0;
+	Note tmpNote;
+
+	// map<int, string> whole_16 = {{55, "C"}, {39, "D"}, {59, "E"}, {63, "F"}, {47, "G"}, {27, "A"}, {31, "B"}, {50, "Rest"}};
+	// map<int, string> half_32 = {{54, "C"}, {38, "D"}, {58, "E"}, {62, "F"}, {46, "G"}, {26, "A"}, {30, "B"}, {35, "Rest"}};
+	// map<int, string> quarter_64 = {{53, "C"}, {37, "D"}, {57, "E"}, {61, "F"}, {45, "G"}, {25, "A"}, {29, "B"}, {43, "Rest"}};
+	// map<int, string> eighth_128 = {{52, "C"}, {36, "D"}, {56, "E"}, {60, "F"}, {44, "G"}, {24, "A"}, {28, "B"}, {51, "Rest"}};
+
+	int scoreTmp;
+
+	for (int i = 0; i < yLineCnt / 3; i++)
+	{
+		RH_cnt = 0;
+		LH_cnt = 0;
+		hFlag = 0;
+
+		for (int j = 0; j < realX / 2 - 1; j++)
+		{
+			if (brailleSet[j + (i * realX / 2)].value == 17 && brailleSet[j + (i * realX / 2) + 1].value == 22)
+			{
+				hFlag = 1; // RH
+				break;
+			}
+
+			if (brailleSet[j + (i * realX / 2)].value == 21 && brailleSet[j + (i * realX / 2) + 1].value == 22)
+			{
+				hFlag = 2; // LH
+				break;
+			}
+		}
+
+		if (hFlag == 1)
+		{
+			for (int j = 0; j < realX / 2; j++)
+			{
+				scoreTmp = brailleSet[j + (i * realX / 2)].value;
+
+				if (scoreTmp == 16 || scoreTmp == 20 || scoreTmp == 21 || scoreTmp == 4 || scoreTmp == 17 || scoreTmp == 5 || scoreTmp == 1)
+					octaveFlag = checkOctave(scoreTmp);
+				else
+				{
+					if (scoreTmp >= 52 && scoreTmp <= 55) // C
+					{
+						tmpNote.value = 12 * octaveFlag;
+						tmpNote.tick = (int)pow(2, scoreTmp - 49);
+						if(j != realX-1)
+							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp >= 36 && scoreTmp <= 39) // D
+					{
+						tmpNote.value = 12 * octaveFlag + 2;
+						tmpNote.tick = (int)pow(2, scoreTmp - 33);
+						if(j != realX-1)
+							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp >= 56 && scoreTmp <= 59) // E
+					{
+						tmpNote.value = 12 * octaveFlag + 4;
+						tmpNote.tick = (int)pow(2, scoreTmp - 53);
+						if(j != realX-1)
+							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp >= 60 && scoreTmp <= 63) // F
+					{
+						tmpNote.value = 12 * octaveFlag + 5;
+						tmpNote.tick = (int)pow(2, scoreTmp - 57);
+						if(j != realX-1)
+							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp >= 44 && scoreTmp <= 47) // G
+					{
+						tmpNote.value = 12 * octaveFlag + 7;
+						tmpNote.tick = (int)pow(2, scoreTmp - 41);
+						if(j != realX-1)
+							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp >= 24 && scoreTmp <= 27) // A
+					{
+						tmpNote.value = 12 * octaveFlag + 9;
+						tmpNote.tick = (int)pow(2, scoreTmp - 21);
+						if(j != realX-1)
+							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp >= 28 && scoreTmp <= 31) // B
+					{
+						tmpNote.value = 12 * octaveFlag + 11;
+						tmpNote.tick = (int)pow(2, scoreTmp - 25);
+						if(j != realX-1)
+							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp == 50)
+					{
+						tmpNote.value = -1;
+						tmpNote.tick = 64;
+						if(j != 0)
+							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp == 35)
+					{
+						tmpNote.value = -1;
+						tmpNote.tick = 32;
+						if(j != 0)
+							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp == 43)
+					{
+						tmpNote.value = -1;
+						tmpNote.tick = 16;
+						if(j != 0)
+							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else if (scoreTmp == 51)
+					{
+						tmpNote.value = -1;
+						tmpNote.tick = 8;
+						if(j != 0)
+							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+								tmpNote.tick += tmpNote.tick / 2;
+					}
+					else
+						continue;
+					
+					noteSet.push_back(tmpNote);
+				}
+			}
+		}
+		else if (hFlag == 2)
+		{
+			continue;
+		}
+		else
+			continue;
+
+		tmpNote.value = -2;
+		tmpNote.tick = -2;
+		noteSet.push_back(tmpNote);
+	}
+}
+
+int checkOctave(int octave)
+{
+	int octaveNum = 0;
+	switch (octave)
+	{
+	case 16:
+		octaveNum = 1;
+		break;
+	case 20:
+		octaveNum = 2;
+		break;
+	case 21:
+		octaveNum = 3;
+		break;
+	case 4:
+		octaveNum = 4;
+		break;
+	case 17:
+		octaveNum = 5;
+		break;
+	case 5:
+		octaveNum = 6;
+		break;
+	case 1:
+		octaveNum = 7;
+		break;
+	}
+	return octaveNum;
 }

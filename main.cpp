@@ -1,10 +1,19 @@
 #include "Braille.h"
 
-int main()
+int main(int argc, char *argv[])
 {
+    // error if there is no input file path
+    if (argc != 2)
+        return 0;
 
     // Mat score = imread("images.jpeg", IMREAD_GRAYSCALE);
-    Mat firstScore = imread("./score/score4.jpg", IMREAD_GRAYSCALE);
+    Mat firstScore = imread(argv[1], IMREAD_GRAYSCALE);
+
+    // error if program fail to read image
+    if(firstScore.empty())
+        return 0;
+
+
     Mat score;
 
     int resizeRow = firstScore.rows * 4 / 5;
@@ -25,11 +34,20 @@ int main()
     Mat BrailleScore(score.size(), CV_8UC3);
     BrailleScore = findCircle(normalScore);
 
-    for(int i = 0; i < brailleSet.size(); i++)
-        printf("%d ", brailleSet[i].value);
-    printf("\n");
+    // for (int i = 0; i < brailleSet.size(); i++)
+    //     printf("%d ", brailleSet[i].value);
+    // printf("\n");
 
-    waitKey(0);
+    convert2Score();
+
+    for(int i = 0; i < noteSet.size(); i++)
+    {
+        if(noteSet[i].value == -2 && noteSet[i].tick == -2)
+            printf("\n");
+        else
+            printf("%d/%d ", noteSet[i].tick, noteSet[i].value);
+    }
+
+
     return 0;
 }
-
