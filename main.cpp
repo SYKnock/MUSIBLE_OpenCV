@@ -10,9 +10,8 @@ int main(int argc, char *argv[])
     Mat firstScore = imread(argv[1], IMREAD_GRAYSCALE);
 
     // error if program fail to read image
-    if(firstScore.empty())
+    if (firstScore.empty())
         return 0;
-
 
     Mat score;
 
@@ -40,14 +39,33 @@ int main(int argc, char *argv[])
 
     convert2Score();
 
-    for(int i = 0; i < noteSet.size(); i++)
+    for (int i = 0; i < noteSet.size(); i++)
     {
-        if(noteSet[i].value == -2 && noteSet[i].tick == -2)
-            printf("\n");
+        if (noteSet[i].value == 71)
+        {
+            printf("%d/%d ", noteSet[i].tick, noteSet[i].value - 12);
+            if (i != noteSet.size() - 1)
+            {
+                if (noteSet[i + 1].value == 69)
+                {
+                    printf("%d/%d ", noteSet[i + 1].tick, noteSet[i + 1].value - 12);
+                    if (i != noteSet.size() - 2)
+                    {
+                        if (noteSet[i + 2].value == 67)
+                        {
+                            printf("%d/%d ", noteSet[i + 2].tick, noteSet[i + 2].value - 12);
+                            i++;
+                        }
+                    }
+                    i++;
+                }
+            }
+        }
         else
             printf("%d/%d ", noteSet[i].tick, noteSet[i].value);
     }
 
+    printf("\n");
 
     return 0;
 }

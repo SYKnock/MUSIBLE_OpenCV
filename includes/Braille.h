@@ -34,7 +34,7 @@ typedef struct __Note
 	int value;
 	__Note()
 	{
-		tick= 0;
+		tick = 0;
 		value = 0;
 	}
 	~__Note()
@@ -446,6 +446,9 @@ void convert2Score()
 		RH_cnt = 0;
 		LH_cnt = 0;
 		hFlag = 0;
+		//octaveFlag = 0;
+		tmpNote.value = 0;
+		tmpNote.tick = 0;
 
 		for (int j = 0; j < realX / 2 - 1; j++)
 		{
@@ -464,105 +467,127 @@ void convert2Score()
 
 		if (hFlag == 1)
 		{
-			for (int j = 0; j < realX / 2; j++)
+			for (int j = 2; j < realX / 2; j++)
 			{
-				scoreTmp = brailleSet[j + (i * realX / 2)].value;
-
+				scoreTmp = brailleSet[j + i * (realX / 2)].value;
+				
 				if (scoreTmp == 16 || scoreTmp == 20 || scoreTmp == 21 || scoreTmp == 4 || scoreTmp == 17 || scoreTmp == 5 || scoreTmp == 1)
-					octaveFlag = checkOctave(scoreTmp);
+				{
+					if(scoreTmp == 17)
+					{
+						if(brailleSet[j + (i * realX / 2) + 1].value != 22)
+							octaveFlag = checkOctave(scoreTmp);
+					}
+					else
+						octaveFlag = checkOctave(scoreTmp);
+					continue;
+				}
+					
 				else
 				{
+					
 					if (scoreTmp >= 52 && scoreTmp <= 55) // C
 					{
+						//printf("//%d\n", octaveFlag);
 						tmpNote.value = 12 * octaveFlag;
 						tmpNote.tick = (int)pow(2, scoreTmp - 49);
-						if(j != realX-1)
-							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+						if (j != realX - 1)
+							if (brailleSet[j + (i * realX / 2) + 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp >= 36 && scoreTmp <= 39) // D
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = 12 * octaveFlag + 2;
 						tmpNote.tick = (int)pow(2, scoreTmp - 33);
-						if(j != realX-1)
-							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+						if (j != realX - 1)
+							if (brailleSet[j + (i * realX / 2) + 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp >= 56 && scoreTmp <= 59) // E
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = 12 * octaveFlag + 4;
 						tmpNote.tick = (int)pow(2, scoreTmp - 53);
-						if(j != realX-1)
-							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+						if (j != realX - 1)
+							if (brailleSet[j + (i * realX / 2) + 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp >= 60 && scoreTmp <= 63) // F
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = 12 * octaveFlag + 5;
 						tmpNote.tick = (int)pow(2, scoreTmp - 57);
-						if(j != realX-1)
-							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+						if (j != realX - 1)
+							if (brailleSet[j + (i * realX / 2) + 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp >= 44 && scoreTmp <= 47) // G
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = 12 * octaveFlag + 7;
 						tmpNote.tick = (int)pow(2, scoreTmp - 41);
-						if(j != realX-1)
-							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+						if (j != realX - 1)
+							if (brailleSet[j + (i * realX / 2) + 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp >= 24 && scoreTmp <= 27) // A
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = 12 * octaveFlag + 9;
 						tmpNote.tick = (int)pow(2, scoreTmp - 21);
-						if(j != realX-1)
-							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+						if (j != realX - 1)
+							if (brailleSet[j + (i * realX / 2) + 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp >= 28 && scoreTmp <= 31) // B
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = 12 * octaveFlag + 11;
 						tmpNote.tick = (int)pow(2, scoreTmp - 25);
-						if(j != realX-1)
-							if(brailleSet[j + (i * realX / 2)+1].value == 2) // dot
+						if (j != realX - 1)
+							if (brailleSet[j + (i * realX / 2) + 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp == 50)
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = -1;
 						tmpNote.tick = 64;
-						if(j != 0)
-							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+						if (j != 0)
+							if (brailleSet[j + (i * realX / 2) - 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp == 35)
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = -1;
 						tmpNote.tick = 32;
-						if(j != 0)
-							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+						if (j != 0)
+							if (brailleSet[j + (i * realX / 2) - 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp == 43)
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = -1;
 						tmpNote.tick = 16;
-						if(j != 0)
-							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+						if (j != 0)
+							if (brailleSet[j + (i * realX / 2) - 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else if (scoreTmp == 51)
 					{
+						// printf("//%d\n", octaveFlag);
 						tmpNote.value = -1;
 						tmpNote.tick = 8;
-						if(j != 0)
-							if(brailleSet[j + (i * realX / 2)-1].value == 2) // dot
+						if (j != 0)
+							if (brailleSet[j + (i * realX / 2) - 1].value == 2) // dot
 								tmpNote.tick += tmpNote.tick / 2;
 					}
 					else
 						continue;
-					
+
 					noteSet.push_back(tmpNote);
 				}
 			}
@@ -574,38 +599,37 @@ void convert2Score()
 		else
 			continue;
 
-		tmpNote.value = -2;
-		tmpNote.tick = -2;
-		noteSet.push_back(tmpNote);
+		// tmpNote.value = -2;
+		// tmpNote.tick = -2;
+		// noteSet.push_back(tmpNote);
 	}
 }
 
 int checkOctave(int octave)
 {
-	int octaveNum = 0;
 	switch (octave)
 	{
 	case 16:
-		octaveNum = 1;
+		octave= 1;
 		break;
 	case 20:
-		octaveNum = 2;
+		octave = 2;
 		break;
 	case 21:
-		octaveNum = 3;
+		octave = 3;
 		break;
 	case 4:
-		octaveNum = 4;
+		octave = 4;
 		break;
 	case 17:
-		octaveNum = 5;
+		octave = 5;
 		break;
 	case 5:
-		octaveNum = 6;
+		octave = 6;
 		break;
 	case 1:
-		octaveNum = 7;
+		octave = 7;
 		break;
 	}
-	return octaveNum;
+	return octave;
 }
