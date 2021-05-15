@@ -439,11 +439,6 @@ void convert2Score()
 	int octaveFlag = 0;
 	Note tmpNote;
 
-	// map<int, string> whole_16 = {{55, "C"}, {39, "D"}, {59, "E"}, {63, "F"}, {47, "G"}, {27, "A"}, {31, "B"}, {50, "Rest"}};
-	// map<int, string> half_32 = {{54, "C"}, {38, "D"}, {58, "E"}, {62, "F"}, {46, "G"}, {26, "A"}, {30, "B"}, {35, "Rest"}};
-	// map<int, string> quarter_64 = {{53, "C"}, {37, "D"}, {57, "E"}, {61, "F"}, {45, "G"}, {25, "A"}, {29, "B"}, {43, "Rest"}};
-	// map<int, string> eighth_128 = {{52, "C"}, {36, "D"}, {56, "E"}, {60, "F"}, {44, "G"}, {24, "A"}, {28, "B"}, {51, "Rest"}};
-
 	int scoreTmp;
 
 	for (int i = 0; i < yLineCnt / 3; i++)
