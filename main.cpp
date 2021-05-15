@@ -33,10 +33,6 @@ int main(int argc, char *argv[])
     Mat BrailleScore(score.size(), CV_8UC3);
     BrailleScore = findCircle(normalScore);
 
-    // for (int i = 0; i < brailleSet.size(); i++)
-    //     printf("%d ", brailleSet[i].value);
-    // printf("\n");
-
     convert2Score();
 
     for (int i = 0; i < noteSet.size(); i++)
