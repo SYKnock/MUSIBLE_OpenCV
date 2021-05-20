@@ -124,6 +124,9 @@ float getBlobSize(vector<KeyPoint> keypoints)
 	float blobSize = 0.0;
 	for (int i = 0; i < keypoints.size(); i++)
 		blobSize += keypoints[i].size;
+	
+	if(keypoints.size() == 0)
+		exit(0);
 
 	blobSize = blobSize / keypoints.size();
 	return blobSize;
@@ -208,11 +211,23 @@ Mat reblobWithSegmentation(Mat blobScore, vector<KeyPoint> keypoints)
 			}
 		}
 	}
+	Mat tmp_mat;
+	
 	for (int i = 0; i < xLineCnt; i++)
+	{
+		if(tmpCntX[i] == 0)
+			exit(0);
 		avgX[i] /= tmpCntX[i];
+	}
+		
 
 	for (int i = 0; i < yLineCnt; i++)
+	{
+		if(tmpCntY[i] == 0)
+			exit(0);
 		avgY[i] /= tmpCntY[i];
+	}
+		
 
 	for (int i = 0; i < xLineCnt; i++)
 		blobX.push_back((int)avgX[i]);
@@ -315,6 +330,13 @@ vector<int> makeGridX(vector<int> blobX, int blobSize)
 		distance[i] = blobX[i + 1] - blobX[i];
 	for (int i = 0; i < xLineCnt - 1; i++)
 		average += distance[i];
+	
+	vector<int> tmp_null;
+
+
+	if(xLineCnt - yLineCnt == 0)
+		exit(0);
+
 	average /= xLineCnt - yLineCnt;
 
 	vector<int> refinedDistance;
@@ -333,6 +355,9 @@ vector<int> makeGridX(vector<int> blobX, int blobSize)
 	for (vector<int>::iterator iter = refinedDistance.begin(); iter != refinedDistance.end(); iter++)
 		refinedAverage += *iter;
 
+	if(refinedDistance.size() == 0)
+		exit(0);
+	
 	refinedAverage /= refinedDistance.size();
 
 	for (int i = 0; i < xLineCnt - 1; i++)
@@ -376,7 +401,7 @@ Mat findCircle(Mat score)
 
 	if (keypoints.empty())
 	{
-		cout << "There is no braille in score" << endl;
+		// cout << "There is no braille in score" << endl;
 		return score;
 	}
 
@@ -420,7 +445,7 @@ Mat dataCheck(Mat score, vector<KeyPoint> keypoints)
 		bottomLeft.x -= blobSize / 2;
 		bottomLeft.y += getTextSize(bitset<6>(brailleSet[i].value).to_string(), font, fontScale * 0.7, fontThick * 0.7, 0).height / 2 + blobSize / 2;
 
-		putText(dataScore, to_string(brailleSet[i].value), center, font, fontScale, Scalar(255, 0, 0), fontThick);
+		putText(dataScore, to_string(brailleSet[i].value), center, font, fontScale, Scalar(255, 255, 0), fontThick);
 		putText(dataScore, bitset<6>(brailleSet[i].value).to_string(), bottomLeft, font, fontScale * 0.5, Scalar(0, 0, 0), fontThick * 0.5);
 	}
 
